@@ -50,5 +50,5 @@ JVM_OPTS="$JVM_OPTS -XX:+UseCondCardMark"
 JVM_OPTS="$JVM_OPTS -Djava.net.preferIPv4Stack=true"
 
 
-exec /usr/bin/java $JVM_OPTS $cassandra_parms -cp "$CLASSPATH" org.apache.cassandra.service.CassandraDaemon
+exec /usr/bin/java $JVM_OPTS $cassandra_parms -cp "$CLASSPATH" org.apache.cassandra.service.CassandraDaemon 2>&1 | tee /storage/logs/cassandra.out
 
