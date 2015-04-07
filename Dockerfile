@@ -12,7 +12,6 @@ RUN \
   && wget -O "/$PKG_NAME.tar.gz" "http://apache-mirror.rbc.ru/pub/apache/cassandra/2.1.4/$PKG_NAME-bin.tar.gz" \
   && echo "$PKG_SHA1 /$PKG_NAME.tar.gz" | sha1sum -c - \
   && tar xvzf $PKG_NAME.tar.gz \
-  && apt-get purge -y --auto-remove wget ca-certificates \
   && rm -rf /var/lib/apt/lists/* \
   && rm -f $PKG_NAME.tar.gz \
   && mv /$PKG_NAME /cassandra \
