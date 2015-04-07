@@ -8,7 +8,7 @@ ENV PKG_SHA1 e7283e873403d2e9dac24531d58df21246e5cf3f
 RUN \
   cd / \
   && apt-get update -y \
-  && apt-get install -y wget ca-certificates lua5.2 \
+  && apt-get install -y lua5.2 \
   && wget -O "/$PKG_NAME.tar.gz" "http://apache-mirror.rbc.ru/pub/apache/cassandra/2.1.4/$PKG_NAME-bin.tar.gz" \
   && echo "$PKG_SHA1 /$PKG_NAME.tar.gz" | sha1sum -c - \
   && tar xvzf $PKG_NAME.tar.gz \
