@@ -1,0 +1,54 @@
+#!/bin/bash -eux
+
+export MEM_USE="$(($(grep '^MemTotal:[[:space:]]' /proc/meminfo|awk '{print $2}')*$MEM_PC/100))"
+export LOCAL_ADDR="$(ip addr show dev eth0|grep -P '^\s*inet\s+'|tr '/' ' '|awk '{print $2}')"
+
+for tFile in /cassandra/conf/*.template
+  do
+  /usr/local/bin/templater.lua < $tFile | tee /cassandra/conf/$(basename $tFile .template)
+  done
+
+JAVA_HOME=/usr/lib/jvm/java-8-oracle/
+
+CASSANDRA_HOME=/cassandra
+CASSANDRA_CONF="$CASSANDRA_HOME/conf"
+
+cassandra_bin="$CASSANDRA_HOME/build/classes/main"
+cassandra_bin="$cassandra_bin:$CASSANDRA_HOME/build/classes/thrift"
+#cassandra_bin="$cassandra_home/build/cassandra.jar"
+
+cassandra_storagedir="/storage/data"
+
+cassandra_parms="-Dlogback.configurationFile=logback.xml"
+cassandra_parms="$cassandra_parms -Dcassandra.logdir=/storage/logs"
+cassandra_parms="$cassandra_parms -Dcassandra.storagedir=/storage/data"
+
+cassandra_parms="$cassandra_parms -Dcassandra-foreground=yes"
+
+CLASSPATH="$CASSANDRA_CONF:$cassandra_bin"
+
+for jar in "$CASSANDRA_HOME"/lib/*.jar; do
+    CLASSPATH="$CLASSPATH:$jar"
+done
+
+JMX_PORT="7199"
+JVM_OPTS="-Djava.awt.headless=true"
+JVM_OPTS="$JVM_OPTS -javaagent:$CASSANDRA_HOME/lib/jamm-0.3.0.jar"
+JVM_OPTS="$JVM_OPTS -XX:+CMSClassUnloadingEnabled"
+JVM_OPTS="$JVM_OPTS -XX:+UseThreadPriorities"
+JVM_OPTS="$JVM_OPTS -XX:ThreadPriorityPolicy=42"
+JVM_OPTS="$JVM_OPTS -Xmx${MEM_USE}"
+JVM_OPTS="$JVM_OPTS -XX:+HeapDumpOnOutOfMemoryError"
+JVM_OPTS="$JVM_OPTS -Xss256k"
+JVM_OPTS="$JVM_OPTS -XX:StringTableSize=1000003"
+
+JVM_OPTS="$JVM_OPTS -XX:+UseG1GC"
+
+JVM_OPTS="$JVM_OPTS -XX:+CMSParallelInitialMarkEnabled -XX:+CMSEdenChunksRecordAlways -XX:CMSWaitDuration=10000"
+JVM_OPTS="$JVM_OPTS -XX:+UseCondCardMark"
+
+JVM_OPTS="$JVM_OPTS -Djava.net.preferIPv4Stack=true"
+
+
+exec /usr/bin/java $JVM_OPTS $cassandra_parms -cp "$CLASSPATH" org.apache.cassandra.service.CassandraDaemon
+

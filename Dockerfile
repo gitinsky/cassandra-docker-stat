@@ -1,41 +1,35 @@
-FROM       ubuntu:14.04
-MAINTAINER Al Tobey <atobey@datastax.com>
+FROM dockerfile/java:oracle-java8
 
-VOLUME ["/data"]
-ENTRYPOINT ["/bin/cassandra-docker"]
+MAINTAINER Daniel Podolsky <dp@gitinsky.com>
 
-COPY install-ubuntu-packages.sh /
-RUN /bin/sh /install-ubuntu-packages.sh
+ENV PKG_NAME apache-cassandra-2.1.4
+ENV PKG_SHA1 e7283e873403d2e9dac24531d58df21246e5cf3f
 
-# TEMPORARY: while the mirrors are messed up and I'm doing
-# dev passes, this will expect a tarball in the root of the repo
-# wget http://www.apache.dist/cassandra/2.1.3/apache-cassandra-2.1.3-bin.tar.gz
-COPY apache-cassandra-2.1.3-bin.tar.gz /
+RUN \
+  cd / \
+  && apt-get update -y \
+  && apt-get install -y wget ca-certificates lua5.2 \
+  && wget -O "/$PKG_NAME.tar.gz" "http://apache-mirror.rbc.ru/pub/apache/cassandra/2.1.4/$PKG_NAME-bin.tar.gz" \
+  && echo "$PKG_SHA1 /$PKG_NAME.tar.gz" | sha1sum -c - \
+  && tar xvzf $PKG_NAME.tar.gz \
+  && apt-get purge -y --auto-remove wget ca-certificates \
+  && rm -rf /var/lib/apt/lists/* \
+  && rm -f $PKG_NAME.tar.gz \
+  && mv /$PKG_NAME /cassandra \
+  && mv /cassandra/conf /cassandra/conf.orig
 
-COPY install-cassandra-tarball.sh /
-RUN /bin/sh /install-cassandra-tarball.sh
+ADD cassandra/conf/cassandra.yaml.template /cassandra/conf/cassandra.yaml.template
+ADD cassandra/conf/logback.xml.template /cassandra/conf/logback.xml.template
+ADD cassandra/conf/cassandra-topology.properties.template /cassandra/conf/cassandra-topology.properties.template
 
-# create a cassandra user:group & chown
-# Note: this UID/GID is hard-coded in main.go
-RUN groupadd -g 1337 cassandra && \
-    useradd -u 1337 -g cassandra -s /bin/sh -d /data cassandra && \
-    chown -R cassandra:cassandra /data
+ADD usr/local/bin/templater.lua /usr/local/bin/templater.lua
+ADD usr/local/share/lua/5.2/fwwrt/simplelp.lua /usr/local/share/lua/5.2/fwwrt/simplelp.lua
 
-# the source configuration (templates) need to be in /src/conf
-# so the entry point can find them
-COPY conf /src/conf
+ADD cassandra-autoconfig /cassandra-autoconfig
 
-# install the entrypoint
-# building it is just: go build
-COPY cassandra-docker/cassandra-docker /bin/
+VOLUME ["/storage/data"]
+VOLUME ["/storage/logs"]
 
-# create symlinks for common commands (for docker exec)
-RUN ln -s /bin/cassandra-docker /bin/cassandra && \
-    ln -s /bin/cassandra-docker /bin/cqlsh     && \
-    ln -s /bin/cassandra-docker /bin/nodetool  && \
-    ln -s /bin/cassandra-docker /bin/cassandra-stress
-
-# Storage Port, JMX, Thrift, CQL Native, OpsCenter Agent
-# Left out: SSL
 EXPOSE 7000 7199 9042 9160 61621
 
+CMD ["/cassandra-autoconfig"]
