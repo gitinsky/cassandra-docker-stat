@@ -47,7 +47,7 @@ listen_address: <%=os.getenv("NODE_ADDR")%>
 start_native_transport: true
 native_transport_port: 9042
 start_rpc: true
-rpc_address: localhost
+rpc_address: <%=os.getenv("NODE_ADDR")%>
 rpc_port: 9160
 rpc_keepalive: true
 rpc_server_type: sync
