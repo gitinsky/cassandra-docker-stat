@@ -17,7 +17,8 @@ sudo docker run \
   -e CLUSTER_ADDRS="comma separated list of addresses" \
   -e CLUSTER_NAME=setup-filestore \
   -e NODE_NAME="$(hostname)" \
-  -e NODE_ADDR="$(ip addr show dev eth1|grep -P '^\s*inet\s+'|tr '/' ' '|awk '{print $2}')" \
+  -e NODE_EXT_ADDR="$(ip addr show dev eth0|grep -P '^\s*inet\s+'|tr '/' ' '|awk '{print $2}')" \
+  -e NODE_INT_ADDR="$(ip addr show dev eth1|grep -P '^\s*inet\s+'|tr '/' ' '|awk '{print $2}')" \
   -p 7000:7000 -p 7199:7199 -p 9042:9042 -p 9160:9160 -p 61621:61621 \
   -v /storage/data:/storage/data \
   -v /storage/logs:/storage/logs \
