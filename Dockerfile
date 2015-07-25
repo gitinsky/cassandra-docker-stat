@@ -2,14 +2,15 @@ FROM relateiq/oracle-java8
 
 MAINTAINER Daniel Podolsky <dp@gitinsky.com>
 
-ENV PKG_NAME apache-cassandra-2.1.4
-ENV PKG_SHA1 e7283e873403d2e9dac24531d58df21246e5cf3f
+ENV PKG_VERSION 2.1.8
+ENV PKG_NAME    apache-cassandra
+ENV PKG_SHA1    8fc0b4763487656793e9cb6016b939e0260e057e
 
 RUN \
   cd / \
   && apt-get update -y \
   && apt-get install -y lua5.2 \
-  && wget -O "/$PKG_NAME.tar.gz" "http://apache-mirror.rbc.ru/pub/apache/cassandra/2.1.4/$PKG_NAME-bin.tar.gz" \
+  && wget -O "/$PKG_NAME.tar.gz" "http://apache-mirror.rbc.ru/pub/apache/cassandra/$PKG_VERSION/$PKG_NAME-$PKG_VERSION-bin.tar.gz" \
   && echo "$PKG_SHA1 /$PKG_NAME.tar.gz" | sha1sum -c - \
   && tar xvzf $PKG_NAME.tar.gz \
   && rm -rf /var/lib/apt/lists/* \
