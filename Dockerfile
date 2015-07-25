@@ -15,7 +15,7 @@ RUN \
   && tar xvzf $PKG_NAME.tar.gz \
   && rm -rf /var/lib/apt/lists/* \
   && rm -f $PKG_NAME.tar.gz \
-  && mv /$PKG_NAME /cassandra \
+  && mv /$PKG_NAME-$PKG_VERSION /cassandra \
   && mv /cassandra/conf /cassandra/conf.orig
 
 ADD cassandra/conf/cassandra.yaml.template /cassandra/conf/cassandra.yaml.template
