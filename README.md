@@ -24,6 +24,6 @@ sudo docker run \
   -v /storage/cassandra-stat/logs:/storage/logs \
   -v /storage/cassandra-stat/commitlog:/storage/commitlog \
   -v /storage/cassandra-stat/saved_caches:/storage/saved_caches \
-  -t -i gitinsky/cassandra-docker-stat \
+  -t -i gitinsky/cassandra-stat \
   ;
 ```
