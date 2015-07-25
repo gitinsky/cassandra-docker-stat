@@ -1,4 +1,4 @@
-FROM dockerfile/java:oracle-java8
+FROM relateiq/oracle-java8
 
 MAINTAINER Daniel Podolsky <dp@gitinsky.com>
 
